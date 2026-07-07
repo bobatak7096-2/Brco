@@ -19,8 +19,9 @@ local speed = 50
 local speedMultiplier = 3
 local jumpPower = 50 
 local spinning = false
-local spinSpeed = 180 
+local spinSpeed = 18000 
 local invisible = false
+local noclip = false -- Added Noclip state
 local originalTransparencies = {}
 
 local SelectedTargets = {}
@@ -52,7 +53,7 @@ Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 18)
 local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Thickness = 3
 MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-MainStroke.Color = Color3.fromRGB(0, 200, 180)
+MainStroke.Color = Color3.fromRGB(255, 0, 0)
 MainStroke.Transparency = 0.25
 
 local Title = Instance.new("TextLabel", MainFrame)
@@ -67,9 +68,9 @@ Title.TextXAlignment = Enum.TextXAlignment.Left
 
 local UIGradient = Instance.new("UIGradient", Title)
 UIGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 200)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 150, 255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 255, 200)),
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 128, 0)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)),
 })
 
 local SubTitle = Instance.new("TextLabel", MainFrame)
@@ -98,7 +99,7 @@ ListFrame.Position = UDim2.new(0, 18, 0, 70)
 ListFrame.Size = UDim2.new(0, 110, 0, 165)
 ListFrame.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
 ListFrame.ScrollBarThickness = 4
-ListFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 200)
+ListFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 0)
 ListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
 ListFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 Instance.new("UICorner", ListFrame).CornerRadius = UDim.new(0, 12)
@@ -127,7 +128,7 @@ local function createListButton(name, order)
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
     local stroke = Instance.new("UIStroke", btn)
     stroke.Thickness = 1.5
-    stroke.Color = Color3.fromRGB(0, 255, 200)
+    stroke.Color = Color3.fromRGB(255, 0, 0)
     stroke.Transparency = 0.6
     return btn, stroke
 end
@@ -138,6 +139,7 @@ local JumpListButton, JumpListStroke = createListButton("Jump", 3)
 local FlingListButton, FlingListStroke = createListButton("Fling", 4)
 local SpinListButton, SpinListStroke = createListButton("Spin", 5)
 local InvisListButton, InvisListStroke = createListButton("Invisible", 6)
+local NoclipListButton, NoclipListStroke = createListButton("Noclip", 7) -- Added Noclip Button
 
 -- ===================== CONTENT AREA (RIGHT SIDE) =====================
 
@@ -162,7 +164,7 @@ Toggle.AutoButtonColor = false
 Instance.new("UICorner", Toggle).CornerRadius = UDim.new(0, 12)
 local ToggleStroke = Instance.new("UIStroke", Toggle)
 ToggleStroke.Thickness = 2
-ToggleStroke.Color = Color3.fromRGB(0, 255, 200)
+ToggleStroke.Color = Color3.fromRGB(255, 0, 0)
 
 local FlyHint = Instance.new("TextLabel", FlyPanel)
 FlyHint.BackgroundTransparency = 1
@@ -254,7 +256,7 @@ SpinToggle.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 Instance.new("UICorner", SpinToggle).CornerRadius = UDim.new(0, 12)
 local SpinToggleStroke = Instance.new("UIStroke", SpinToggle)
 SpinToggleStroke.Thickness = 2
-SpinToggleStroke.Color = Color3.fromRGB(0, 255, 200)
+SpinToggleStroke.Color = Color3.fromRGB(255, 0, 0)
 
 local SpinSpeedBox = Instance.new("TextBox", SpinPanel)
 SpinSpeedBox.Size = UDim2.new(1, 0, 0, 34)
@@ -280,6 +282,35 @@ InvisToggle.TextSize = 16
 InvisToggle.TextColor3 = Color3.new(1, 1, 1)
 InvisToggle.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 Instance.new("UICorner", InvisToggle).CornerRadius = UDim.new(0, 12)
+
+-- Noclip Panel
+local NoclipPanel = Instance.new("Frame", ContentFrame)
+NoclipPanel.Size = UDim2.new(1, 0, 1, 0)
+NoclipPanel.BackgroundTransparency = 1
+NoclipPanel.Visible = false
+
+local NoclipToggle = Instance.new("TextButton", NoclipPanel)
+NoclipToggle.Size = UDim2.new(1, 0, 0, 46)
+NoclipToggle.Text = "Noclip: OFF"
+NoclipToggle.Font = Enum.Font.GothamBold
+NoclipToggle.TextSize = 16
+NoclipToggle.TextColor3 = Color3.new(1, 1, 1)
+NoclipToggle.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Instance.new("UICorner", NoclipToggle).CornerRadius = UDim.new(0, 12)
+local NoclipToggleStroke = Instance.new("UIStroke", NoclipToggle)
+NoclipToggleStroke.Thickness = 2
+NoclipToggleStroke.Color = Color3.fromRGB(255, 0, 0)
+
+local NoclipHint = Instance.new("TextLabel", NoclipPanel)
+NoclipHint.BackgroundTransparency = 1
+NoclipHint.Position = UDim2.new(0, 0, 0, 55)
+NoclipHint.Size = UDim2.new(1, 0, 0, 60)
+NoclipHint.Font = Enum.Font.Gotham
+NoclipHint.TextSize = 12
+NoclipHint.TextColor3 = Color3.fromRGB(190, 190, 190)
+NoclipHint.TextWrapped = true
+NoclipHint.TextXAlignment = Enum.TextXAlignment.Left
+NoclipHint.Text = "Turn ON to pass cleanly through solid objects and walls."
 
 -- ===================== ADVANCED MULTI-FLING PANEL =====================
 
@@ -308,7 +339,7 @@ PlayerScrollFrame.Position = UDim2.new(0, 4, 0, 4)
 PlayerScrollFrame.Size = UDim2.new(1, -8, 1, -8)
 PlayerScrollFrame.BackgroundTransparency = 1
 PlayerScrollFrame.ScrollBarThickness = 4
-PlayerScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 200)
+PlayerScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 0, 0)
 
 local ScrollLayout = Instance.new("UIListLayout", PlayerScrollFrame)
 ScrollLayout.Padding = UDim.new(0, 4)
@@ -381,7 +412,7 @@ local function RefreshPlayerList()
             Checkmark.Size = UDim2.new(1, 0, 1, 0)
             Checkmark.BackgroundTransparency = 1
             Checkmark.Text = "✓"
-            Checkmark.TextColor3 = Color3.fromRGB(0, 255, 200)
+            Checkmark.TextColor3 = Color3.fromRGB(255, 0, 0)
             Checkmark.TextSize = 11
             Checkmark.Font = Enum.Font.GothamBold
             Checkmark.Visible = SelectedTargets[p.Name] ~= nil
@@ -421,9 +452,9 @@ end
 
 -- ===================== TAB CONTROL SWITCHER =====================
 
-local panels = { Fly = FlyPanel, Speed = SpeedPanel, Jump = JumpPanel, Fling = FlingPanel, Spin = SpinPanel, Invisible = InvisPanel }
-local listButtons = { Fly = FlyListButton, Speed = SpeedListButton, Jump = JumpListButton, Fling = FlingListButton, Spin = SpinListButton, Invisible = InvisListButton }
-local listStrokes = { Fly = FlyListStroke, Speed = SpeedListStroke, Jump = JumpListStroke, Fling = FlingListStroke, Spin = SpinListStroke, Invisible = InvisListStroke }
+local panels = { Fly = FlyPanel, Speed = SpeedPanel, Jump = JumpPanel, Fling = FlingPanel, Spin = SpinPanel, Invisible = InvisPanel, Noclip = NoclipPanel }
+local listButtons = { Fly = FlyListButton, Speed = SpeedListButton, Jump = JumpListButton, Fling = FlingListButton, Spin = SpinListButton, Invisible = InvisListButton, Noclip = NoclipListButton }
+local listStrokes = { Fly = FlyListStroke, Speed = SpeedListStroke, Jump = JumpListStroke, Fling = FlingListStroke, Spin = SpinListStroke, Invisible = InvisListStroke, Noclip = NoclipListStroke }
 
 local function selectTab(name)
     for key, panel in pairs(panels) do
@@ -446,6 +477,7 @@ JumpListButton.MouseButton1Click:Connect(function() selectTab("Jump") end)
 FlingListButton.MouseButton1Click:Connect(function() selectTab("Fling") end)
 SpinListButton.MouseButton1Click:Connect(function() selectTab("Spin") end)
 InvisListButton.MouseButton1Click:Connect(function() selectTab("Invisible") end)
+NoclipListButton.MouseButton1Click:Connect(function() selectTab("Noclip") end)
 selectTab("Fly")
 
 -- ===================== MINIMIZE / DRAG SETUP =====================
@@ -459,7 +491,7 @@ Mini.ImageRectOffset = Vector2.new(324, 364)
 Mini.ImageRectSize = Vector2.new(36, 36)
 Instance.new("UICorner", Mini).CornerRadius = UDim.new(1, 0)
 local MiniStroke = Instance.new("UIStroke", Mini)
-MiniStroke.Color = Color3.fromRGB(0, 255, 200)
+MiniStroke.Color = Color3.fromRGB(255, 0, 0)
 MiniStroke.Thickness = 2
 
 local function setupDrag(gui)
@@ -579,6 +611,12 @@ local function setInvisible(state)
 end
 InvisToggle.MouseButton1Click:Connect(function() setInvisible(not invisible) end)
 
+-- Noclip Toggle Logic
+NoclipToggle.MouseButton1Click:Connect(function()
+    noclip = not noclip
+    NoclipToggle.Text = noclip and "Noclip: ON" or "Noclip: OFF"
+end)
+
 -- ===================== BENSON MULTI-TARGET FLING IMPLEMENTATION =====================
 
 local function SkidFling(TargetPlayer)
@@ -691,6 +729,15 @@ RunService.RenderStepped:Connect(function(dt)
         hum.JumpPower = jumpPower
         if not flying and not FlingActive then
             hum.WalkSpeed = speed
+        end
+    end
+
+    -- Persistent Noclip Logic
+    if noclip and char then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
         end
     end
 
